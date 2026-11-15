@@ -1,0 +1,74 @@
+{
+  "name": "kingdoms-of-war-launcher",
+  "productName": "Kingdoms of War Launcher",
+  "version": "1.0.0",
+  "description": "Launcher and auto-updater for Kingdoms of War",
+  "main": "src/main.js",
+  "author": "piwadev",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64 --publish never"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  },
+  "devDependencies": {
+    "electron": "39.8.10",
+    "electron-builder": "^26.0.0",
+    "resedit": "^3.1.1"
+  },
+  "build": {
+    "appId": "dev.piwadev.kingdomsofwar.launcher",
+    "productName": "Kingdoms of War Launcher",
+    "copyright": "piwadev",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**",
+      "ui/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/bundled",
+        "to": "bundled"
+      }
+    ],
+    "electronLanguages": [
+      "en-US",
+      "en-GB",
+      "nl"
+    ],
+    "compression": "maximum",
+    "afterPack": "build/afterPack.js",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "artifactName": "KingdomsOfWar-Launcher-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Kingdoms of War",
+      "runAfterFinish": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    }
+  }
+}

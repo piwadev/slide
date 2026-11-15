@@ -1,0 +1,14 @@
+# dependencies & build output
+node_modules/
+launcher/dist/
+launcher/resources/bundled/
+release/out/
+*.7z
+*.zip
+*.log
+# local test captures (curated screenshots live in docs/)
+screenshots/
+.DS_Store
+Thumbs.db
+dev/*.png
+dev/*.jpg

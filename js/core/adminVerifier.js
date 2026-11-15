@@ -1,0 +1,2 @@
+// Owner-only admin verifier (salt + PBKDF2-SHA256 hash + iterations only; the passphrase is never stored). Same verifier as Kingdoms of War so the owner uses one passphrase. Regenerate with scripts/make-admin-verifier.mjs.
+export const ADMIN_VERIFIER = { alg: 'PBKDF2-SHA256', iter: 310000, salt: '9783ba52b45d3befcf6430d000f9694c', hash: '21e814130050651827e39d38e367b73ed42b58500a58a0dc58820a4ea634f817' };

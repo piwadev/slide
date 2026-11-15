@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#222}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"../js/vendor/three.module.js","three/addons/":"../js/vendor/jsm/"}}</script></head><body>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { CARS, carById } from '../js/data/cars.js';
+import { defaultCfg } from '../js/data/parts.js';
+import { CarModel } from '../js/render/carBuilder.js';
+const q = new URLSearchParams(location.search);
+const r = new THREE.WebGLRenderer({antialias:true}); r.setSize(innerWidth, innerHeight); r.shadowMap.enabled = true; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 0.75; document.body.appendChild(r.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x30343a);
+const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.03).texture;
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.MeshStandardMaterial({color:0x303236, roughness:0.6})); floor.rotation.x=-Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+const sun = new THREE.DirectionalLight(0xffffff, 2); sun.position.set(4,6,3); sun.castShadow = true; scene.add(sun);
+const car = carById[q.get('car')||'s13']; const cfg = defaultCfg(car);
+if (q.get('cfg')) Object.assign(cfg, JSON.parse(q.get('cfg')));
+if (q.get('parts')) Object.assign(cfg.parts, JSON.parse(q.get('parts')));
+if (q.get('wheels')) Object.assign(cfg.wheels, JSON.parse(q.get('wheels')));
+if (q.get('livery')) Object.assign(cfg.livery, JSON.parse(q.get('livery')));
+if (q.get('look')) Object.assign(cfg.look, JSON.parse(q.get('look')));
+if (q.get('paint')) Object.assign(cfg.paint, JSON.parse(q.get('paint')));
+const m = new CarModel(car, cfg); scene.add(m.root); window.m = m;
+const cam = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 100);
+const a = parseFloat(q.get('a')||'35')*Math.PI/180, e = parseFloat(q.get('e')||'12')*Math.PI/180, d = parseFloat(q.get('d')||'7.5');
+cam.position.set(Math.sin(a)*Math.cos(e)*d, Math.sin(e)*d+0.5, Math.cos(a)*Math.cos(e)*d); cam.lookAt(0,0.6,0);
+r.render(scene, cam); window.done = true;
+</script></body></html>
