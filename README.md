@@ -2,7 +2,7 @@
 
 # SLIDE — Street Drift Racing
 
-A premium Japanese-street drifting game for the desktop. 3D garage, deep car customisation, 6 maps, 12 cars, a 30-event career and a full drift-scoring system — all procedural, no downloads of art assets, runs in its own window.
+A premium Japanese-street drifting game for the desktop. 3D garage, deep car customisation, 6 maps, 18 cars, a 30-event career and a full drift-scoring system — all procedural, no downloads of art assets, runs in its own window.
 
 ## ⬇ Download (Windows)
 
