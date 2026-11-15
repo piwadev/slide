@@ -22,7 +22,7 @@ export const WHEEL_DESIGNS = [
   I('mesh', 'BBS Mesh', 4800, 3, { sp: 24, w: 0.045, taper: 1.0, dish: 0.03, lipw: 0.02, mesh: true }),
   I('turbine', 'Turbine Fan', 4400, 5, { sp: 14, w: 0.15, taper: 0.8, dish: 0.02, lipw: 0.015, twist: 0.55 }),
   I('ssr', 'SSR Split 12', 4100, 6, { sp: 12, w: 0.07, taper: 0.4, dish: 0.025, lipw: 0.018, split: true }),
-  I('rpf', 'Enkei RPF1 10', 2600, 1, { sp: 10, w: 0.14, taper: 0.7, dish: 0.0, lipw: 0.01 }),
+  I('rpf', 'Enkei RPF1 (Stock)', 0, 1, { sp: 10, w: 0.14, taper: 0.7, dish: 0.0, lipw: 0.01 }),
   I('rg', 'Advan RG Twin 5', 4600, 7, { sp: 5, w: 0.1, taper: 0.5, dish: 0.0, lipw: 0.012, split: true }),
   I('steel', 'Steelie (steel)', 600, 1, { sp: 8, w: 0.12, taper: 1, dish: 0.0, lipw: 0.01, disc: true }),
   I('star', 'Starburst 8', 3900, 9, { sp: 8, w: 0.12, taper: 0.35, dish: 0.04, lipw: 0.025, twist: -0.25 }),

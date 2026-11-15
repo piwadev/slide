@@ -90,7 +90,7 @@ export class GarageUI {
   setPath(path, v) { const ks = path.split('.'); let o = this.draft; for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
   click(e) {
     const t = e.target.closest('[data-tab],[data-sub],[data-set],[data-toggle],[data-slot],[data-sticker],[data-perf],[data-a],[data-cam]'); if (!t) return; audio.click(); const d = t.dataset;
-    if (d.tab) { this.tab = d.tab; this.renderTab(); const cams = { wheels: 'wheelF', body: 'hero', paint: 'hero', vinyl: 'side', lights: 'front', perf: 'hero', tune: 'hero' }; this.setCam(cams[d.tab]); return; }
+    if (d.tab) { this.tab = d.tab; this.header(); this.renderTab(); const cams = { wheels: 'wheelF', body: 'hero', paint: 'hero', vinyl: 'side', lights: 'front', perf: 'hero', tune: 'hero' }; this.setCam(cams[d.tab]); return; }
     if (d.sub) { this.sub = d.sub; this.renderTab(); this.setCam({ fbumper: 'front', rbumper: 'rear', skirts: 'side', widebody: 'hero', spoiler: 'rear', hood: 'front', fenders: 'side', mirrors: 'side' }[d.sub] || 'hero'); return; }
     if (d.cam) { this.setCam(d.cam); return; }
     if (d.set) { let v = d.v; this.setPath(d.set, v); this.afterSet(); return; }

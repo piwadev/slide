@@ -167,7 +167,7 @@ export class CarModel {
     const c = this.car, G = this.geom, L = c.L, W = c.W, b = this.body, z0 = L / 2;
     const st1 = G.station(0.03), stN = G.station(0.006), hy = c.noseY;
     const headCol = new THREE.Color(this.cfg.look.head);
-    this.headMat = this.mat(new THREE.MeshStandardMaterial({ color: 0xdddddd, emissive: headCol, emissiveIntensity: 1.1, roughness: 0.1, metalness: 0.2 }));
+    this.headMat = this.mat(new THREE.MeshStandardMaterial({ color: 0xdddddd, emissive: headCol, emissiveIntensity: 0.5, roughness: 0.1, metalness: 0.2 }));
     this.tailMat = this.mat(new THREE.MeshStandardMaterial({ color: 0x5a0008, emissive: 0xff1010, emissiveIntensity: 0.35, roughness: 0.2 }));
     const black = this.blackMat, lensGlass = this.mat(new THREE.MeshPhysicalMaterial({ color: 0xcfd8e0, roughness: 0.05, transmission: 0, transparent: true, opacity: 0.35, clearcoat: 1 }));
     const front = (s) => G.zOf(s);

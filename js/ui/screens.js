@@ -33,10 +33,11 @@ export class UI {
   }
   refresh() { this.refreshPills(); if ($('#screen')) this.go(this.tab); }
   go(tab) {
-    if (this.tab === 'garage' && tab !== 'garage') this.garageUI.close(); this.tab = tab; $$('.nav button', this.menu).forEach(b => b.classList.toggle('on', b.dataset.nav === tab));
+    if (this.tab === 'garage' && tab !== 'garage') this.garageUI.close(); this.tab = tab; this.menu.classList.toggle('ingarage', tab === 'garage'); $$('.nav button', this.menu).forEach(b => b.classList.toggle('on', b.dataset.nav === tab));
     const root = $('#screen'); root.innerHTML = ''; const g = this.app.garage; g.active || g.enter({ quality: this.P.save.settings.quality });
     const car = this.P.car; if (!g.model || g.car !== car || tab !== 'garage') { g.setCar(car, this.P.cfg); }
     if (tab !== 'garage') { g.go('menu'); g.setOffset(tab === 'drive' ? 0.2 : 0.2); }
+    if (tab === 'garage') g.setOffset(0.075);
     this['s_' + tab](root);
   }
   // ---------------------------------------------------------------- DRIVE

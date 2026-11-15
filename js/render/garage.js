@@ -76,9 +76,9 @@ export class GarageScene {
     this.rects = [];
     for (const [x, z] of [[-3.2, -1.5], [3.2, -1.5], [0, 3.8], [0, -5.5]]) { const m = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.1, 0.5), emis('#f4f9ff', 2.2)); m.position.set(x, H - 0.55, z); s.add(m); }
     const mkRect = (col, inten, w, h, x, y, z, tx, ty, tz) => { const l = new THREE.RectAreaLight(new THREE.Color(col), inten, w, h); l.position.set(x, y, z); l.lookAt(tx, ty, tz); s.add(l); this.rects.push(l); return l; };
-    mkRect('#ffffff', 2.6, 6, 1.4, 0, 6.2, 0, 0, 0, 0); mkRect('#cfe6ff', 1.6, 5, 1.2, -5, 5.5, 3.5, 0, 0.4, 0); mkRect('#ffb06a', 1.4, 1.4, 5, 8.5, 3.2, 0, 0, 0.6, 0); mkRect('#ff3d9a', 1.0, 1.2, 4, -9.5, 3, -1, 0, 0.5, 0);
+    mkRect('#ffffff', 2.0, 6, 1.4, 0, 6.2, 0, 0, 0, 0); mkRect('#cfe6ff', 1.6, 5, 1.2, -5, 5.5, 3.5, 0, 0.4, 0); mkRect('#ffb06a', 1.4, 1.4, 5, 8.5, 3.2, 0, 0, 0.6, 0); mkRect('#ff3d9a', 1.0, 1.2, 4, -9.5, 3, -1, 0, 0.5, 0);
     s.add(new THREE.HemisphereLight('#7f8bb0', '#1a1716', 0.55));
-    const spot = this.spot = new THREE.SpotLight('#fff3e0', 70, 30, 0.7, 0.6, 1.4); spot.position.set(2.5, 6.6, 3.5); spot.target.position.set(0, 0.3, 0); spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.0003; spot.shadow.normalBias = 0.03; s.add(spot, spot.target);
+    const spot = this.spot = new THREE.SpotLight('#fff3e0', 55, 30, 0.7, 0.6, 1.4); spot.position.set(2.5, 6.6, 3.5); spot.target.position.set(0, 0.3, 0); spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.0003; spot.shadow.normalBias = 0.03; s.add(spot, spot.target);
     // turntable
     const pad = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.5, 0.08, 64), lam('#1d1f25', { roughness: 0.3, metalness: 0.6 })); pad.position.y = 0.04; pad.receiveShadow = true; s.add(pad);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(3.42, 0.035, 8, 96).rotateX(Math.PI / 2), emis('#ff8a1a', 1.6)); ring.position.y = 0.085; s.add(ring);
@@ -145,7 +145,7 @@ export class GarageScene {
     cv.addEventListener('pointerup', () => { down = false; this.idle = 0; });
     cv.addEventListener('wheel', e => { if (!this.active) return; this.tgt.d = Math.max(2.2, Math.min(14, this.tgt.d * (1 + Math.sign(e.deltaY) * 0.08))); }, { passive: true });
   }
-  enter(opts = {}) { this.active = true; this.stage.setQuality(opts.quality || this.stage.quality); this.stage.renderer.shadowMap.enabled = true; this.stage.use(this.scene, this.cam, { exposure: 0.95, bloom: [0.32, 0.6, 0.92] }); this.spot.castShadow = this.stage.q.shadow > 0; this.refl.visible = this.stage.quality !== 'low'; this.floorMat.opacity = this.refl.visible ? 0.8 : 1; this.idle = 0; this.resize(); }
+  enter(opts = {}) { this.active = true; this.stage.setQuality(opts.quality || this.stage.quality); this.stage.renderer.shadowMap.enabled = true; this.stage.use(this.scene, this.cam, { exposure: 0.78, bloom: [0.22, 0.5, 1.05] }); this.spot.castShadow = this.stage.q.shadow > 0; this.refl.visible = this.stage.quality !== 'low'; this.floorMat.opacity = this.refl.visible ? 0.8 : 1; this.idle = 0; this.resize(); }
   leave() { this.active = false; }
   resize() { const { w, h } = this.stage.size(); this.cam.aspect = w / h; this.applyOffset(); }
   setOffset(fx) { this.offsetTarget = fx; if (this.offsetX === undefined) this.offsetX = fx; }
