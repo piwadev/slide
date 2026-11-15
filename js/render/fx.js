@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const SPR_VS = `attribute float size; attribute float alpha; attribute vec3 tint; varying float vA; varying vec3 vT; varying float vD; uniform float scale;
 void main(){ vA = alpha; vT = tint; vec4 mv = modelViewMatrix * vec4(position,1.0); vD = -mv.z; gl_Position = projectionMatrix * mv; gl_PointSize = size * scale / max(0.1, -mv.z); }`;
 const SPR_FS = `varying float vA; varying vec3 vT; varying float vD; uniform sampler2D map; uniform float add;
-void main(){ vec4 t = texture2D(map, gl_PointCoord); gl_FragColor = vec4(vT * (add > 0.5 ? 1.6 : 1.0), t.a * vA * (add > 0.5 ? 1.0 : smoothstep(1.2, 5.5, vD))); if (gl_FragColor.a < 0.003) discard; }`;
+void main(){ vec4 t = texture2D(map, gl_PointCoord); gl_FragColor = vec4(vT * (add > 0.5 ? 1.6 : 1.0), t.a * vA * (add > 0.5 ? 1.0 : smoothstep(3.0, 11.0, vD) * 0.6)); if (gl_FragColor.a < 0.003) discard; }`;
 function softTex() { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d'); const g = c.createRadialGradient(32, 32, 2, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.45, 'rgba(255,255,255,0.55)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(cv); return t; }
 
 class Pool {

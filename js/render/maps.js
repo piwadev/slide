@@ -170,7 +170,7 @@ function industrial(ctx) {
 function harbor(ctx) {
   const ctrl = [[0, 0], [260, -20], [450, 60], [520, 220], [380, 330], [150, 300], [-60, 360], [-250, 300], [-300, 150], [-200, 20]];
   const path = splinePath(ctrl, true, 2); const hw = 11;
-  const W = base('harbor', path, hw); W.spawn = { ...path.at(10), s: 10 }; W.size = 700; const g = W.group; W.offSurface = { grip: 0.8, drag: 0.6, off: true, kind: 'dock' };
+  const W = base('harbor', path, hw); W.spawn = { ...path.at(10), s: 10 }; W.size = 700; const g = W.group; W.offSurface = { grip: 0.8, drag: 0.6, off: true, kind: 'dock', lin: 0.1 };
   addGround(W, 2600, stdMat('#4e5258', { roughness: 0.9 }), -0.02);
   // water
   const water = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), new THREE.MeshStandardMaterial({ color: '#0d3b52', roughness: 0.12, metalness: 0.6, envMapIntensity: 1.2 })); water.rotation.x = -Math.PI / 2; water.position.set(0, -1.6, 0); g.add(water);
@@ -241,7 +241,7 @@ function desert(ctx) {
 function arena(ctx) {
   const ctrl = [[0, 0], [230, 0], [270, 40], [270, 120], [190, 165], [130, 115], [70, 160], [10, 120], [-55, 165], [-125, 110], [-125, 40]];
   const path = roundedPath(ctrl, [30, 30, 26, 26, 30, 22, 24, 22, 22, 28, 30], true, 2); const hw = 10;
-  const W = base('arena', path, hw); W.spawn = { ...path.at(14), s: 14 }; W.size = 420; const g = W.group; W.offSurface = { grip: 0.68, drag: 1, off: true, kind: 'infield' };
+  const W = base('arena', path, hw); W.spawn = { ...path.at(14), s: 14 }; W.size = 420; const g = W.group; W.offSurface = { grip: 0.68, drag: 1, off: true, kind: 'infield', lin: 0.12 };
   addGround(W, 1400, stdMat('#232629', { roughness: 0.95 }), -0.03);
   const inf = new THREE.Mesh(new THREE.PlaneGeometry(900, 600), new THREE.MeshStandardMaterial({ map: rep(noiseTex('#3c3f42', 24), 60, 40), roughness: 0.9 })); inf.rotation.x = -Math.PI / 2; inf.position.set(70, 0, 80); g.add(inf);
   g.add(roadMesh(path, hw, new THREE.MeshStandardMaterial({ map: asphaltTex('#2d2e33', 3, 1), roughness: 0.58, envMapIntensity: 1.0 }), { vrep: 16, y: 0.03 }));

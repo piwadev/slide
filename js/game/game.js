@@ -18,7 +18,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + 
 const angDiff = (a, b) => { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; };
 const LEADS = { 1: 'ae86', 2: 'jzx100', 3: 's15', 4: 'fd3s', 5: 'r34', 6: 'a80' };
 export const CAM_NAMES = ['Chase', 'Far', 'Hood', 'Cockpit', 'Orbit'];
-const SMOKE_TINT = { day: [0.92, 0.92, 0.94], dusk: [0.78, 0.55, 0.46], night: [0.3, 0.32, 0.46] };
+const SMOKE_TINT = { day: [0.92, 0.92, 0.94], dusk: [0.6, 0.42, 0.36], night: [0.17, 0.18, 0.26] };
 
 export class Game {
   constructor(app) { this.app = app; this.stage = app.stage; this.input = app.input; this.profile = app.profile; this.running = false; this.hud = {}; this.toasts = []; }

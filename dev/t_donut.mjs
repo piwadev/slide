@@ -12,16 +12,18 @@ export default async (p, h) => {
   for (let c = 0; c < secs; c++) {
     const r = await p.evaluate(({A, Bk}) => {
       const a = window.__slide.app, g = a.game, K = a.input.keys; let hit = false;
+      if (!window.__init) { window.__init = 1; const v0 = g.veh; if (g.world.id==='arena'||window.__tele) { v0.reset(70, 20, 0); v0.vz = 20; v0.speed = 20; } else { const P=g.world.path; let s0=60; for (let q=40;q<P.length;q+=2){ if (Math.abs(P.at(q).k)>0.03){ s0=q; break; } } window.__sg = Math.sign(P.at(s0).k)||1; const q0=P.at(Math.max(5,s0-28)); const sy=Math.atan2(q0.tx,q0.tz); v0.reset(q0.x,q0.z,sy); v0.vx=Math.sin(sy)*17; v0.vz=Math.cos(sy)*17; v0.speed=17; } window.__t = 0; }
       for (let i = 0; i < 60; i++) {
-        const v = g.veh, t = window.__t; K.clear(); const ang = Math.abs(v.beta)*57.3;
-        if (t < 2.2) { K.add('KeyW'); if (t > 1.5) { K.add('KeyA'); K.add('Space'); } }
-        else { const st = Math.max(-1, Math.min(1, A + Bk * v.beta)); if (st > 0.05) K.add('KeyA'); else if (st < -0.05) K.add('KeyD'); if (ang < 42 || v.speed < 9) K.add('KeyW'); else if (ang > 60) K.add('KeyS'); }
+        const v = g.veh, t = window.__t; const ang = Math.abs(v.beta)*57.3; let steer = 0, thr = 0, brk = 0, hb = 0, kick = false;
+        if (t < 1.3) { thr = 0.6; if (t > 0.7) { steer = (window.__sg||1); kick = true; hb = 1; } }
+        else { steer = Math.max(-1, Math.min(1, (window.__sg||1)*A + Bk * v.beta)); thr = (ang < 52 || v.speed < 9) ? 1 : 0.5; }
+        a.input.override = { steer, throttle: thr, brake: brk, hb, kick };
         g.update(1/60); window.__t += 1/60;
-        if (ang > 36 && v.speed > 10 && g.time > 5 && g.scorer.live && !window.__shot) { window.__shot = 1; hit = true; }
+        if (ang > 36 && v.speed > 10 && g.time > 1.5 && g.scorer.live && !window.__shot) { window.__shot = 1; hit = true; }
       }
       const v = g.veh; return {t: window.__t.toFixed(0), spd:(v.speed*3.6).toFixed(0), beta:(v.beta*57.3).toFixed(0), combo: g.scorer.combo|0, tot: g.scorer.total|0, mult: g.scorer.mult.toFixed(1), x: v.x.toFixed(0), z: v.z.toFixed(0), yaw: (v.yaw*57.3)|0, gear: v.gear, rpm: v.rpm|0, crashes: g.scorer.stats.crashes, hit};
     }, {A, Bk});
-    h.logs.push(JSON.stringify(r));
-    if (r.hit && shotFile && !shot) { shot = true; await p.evaluate(async ()=>{ const g = window.__slide.app.game; for (let i=0;i<24;i++) { g.noRender = i < 23; g.update(1/60); } window.__slide.app.freeze = true; }); await h.shot(shotFile); await p.evaluate(()=>{ window.__slide.app.freeze = false; window.__slide.app.game.noRender = true; }); }
+    h.logs.push(JSON.stringify(r)); if (c<3) h.logs.push(await p.evaluate(()=>JSON.stringify(window.__slide.app.game.veh.steer)));
+    if (r.hit && shotFile && !shot) { shot = true; await p.evaluate(async ()=>{ const g = window.__slide.app.game; for (let i=0;i<24;i++) { g.noRender = i < 23; g.update(1/60); } g.syncHud(); { const ap = window.__slide.app; ap.hud.update(g, 0.016, ap.profile.save.settings.units); ap.hud.update(g, 0.3, ap.profile.save.settings.units); } window.__slide.app.freeze = true; }); await h.shot(shotFile); await p.evaluate(()=>{ window.__slide.app.freeze = false; window.__slide.app.game.noRender = true; }); }
   }
 };

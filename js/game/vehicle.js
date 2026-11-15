@@ -121,7 +121,7 @@ export class Vehicle {
     const cd = Math.cos(dl), sd = Math.sin(dl);
     const fxCar = FxF * cd - FyF * sd + FxR;
     const fyCar = FxF * sd + FyF * cd + FyR;
-    const dragF = -(this.cdA * speed * u + 0.015 * m * G * Math.sign(u) * Math.min(1, Math.abs(u)) + drag * m * u * 0.5 * Math.abs(u) * 0.02 + (env.off ? 1 : 0) * m * 1.4 * u);
+    const dragF = -(this.cdA * speed * u + 0.015 * m * G * Math.sign(u) * Math.min(1, Math.abs(u)) + drag * m * u * 0.5 * Math.abs(u) * 0.02 + (env.off ? (env.lin === undefined ? 0.45 : env.lin) : 0) * m * u);
     // yaw
     const bAbs = Math.abs(this.beta), over = Math.max(0, bAbs - 0.78) / 0.5;
     const Mz = this.a * (FxF * sd + FyF * cd) - this.b * FyR - (this.tune.assist * 0.8 + 0.2) * over * this.Iz * 3.2 * Math.sign(this.r) * Math.min(1, Math.abs(this.r) / 1.2) * (speed > 6 ? 1 : 0);
