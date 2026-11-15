@@ -1,8 +1,8 @@
 {
-  "name": "kingdoms-of-war-launcher",
-  "productName": "Kingdoms of War Launcher",
+  "name": "slide-launcher",
+  "productName": "SLIDE Launcher",
   "version": "1.0.0",
-  "description": "Launcher and auto-updater for Kingdoms of War",
+  "description": "Launcher and auto-updater for SLIDE",
   "main": "src/main.js",
   "author": "piwadev",
   "license": "MIT",
@@ -20,8 +20,8 @@
     "resedit": "^3.1.1"
   },
   "build": {
-    "appId": "dev.piwadev.kingdomsofwar.launcher",
-    "productName": "Kingdoms of War Launcher",
+    "appId": "dev.piwadev.slide.launcher",
+    "productName": "SLIDE Launcher",
     "copyright": "piwadev",
     "directories": {
       "output": "dist",
@@ -56,7 +56,7 @@
       ],
       "icon": "build/icon.ico",
       "signAndEditExecutable": false,
-      "artifactName": "KingdomsOfWar-Launcher-Setup.${ext}"
+      "artifactName": "SLIDE-Launcher-Setup.${ext}"
     },
     "nsis": {
       "oneClick": true,
@@ -65,7 +65,7 @@
       "deleteAppDataOnUninstall": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Kingdoms of War",
+      "shortcutName": "SLIDE",
       "runAfterFinish": true,
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico"

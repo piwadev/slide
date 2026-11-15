@@ -8,13 +8,13 @@ const log = require('./log');
 const settings = require('./settings');
 const { net } = require('electron'); // Chromium network stack: uses the OS certificate store and proxy settings (better than Node's fetch on Windows)
 
-const DEFAULT_API = 'https://api.github.com/repos/piwadev/kingdoms-of-war/releases/latest';
-const RELEASES_PAGE = 'https://github.com/piwadev/kingdoms-of-war/releases';
+const DEFAULT_API = 'https://api.github.com/repos/piwadev/slide/releases/latest';
+const RELEASES_PAGE = 'https://github.com/piwadev/slide/releases';
 let LAUNCHER_VERSION = '0.0.0'; let RESOURCES = '';
 function init(launcherVersion, resourcesPath) { LAUNCHER_VERSION = launcherVersion; RESOURCES = resourcesPath; }
 
 // ---------------------------------------------------------------- helpers
-const apiUrl = () => process.env.KOW_API || settings.get().apiUrl || DEFAULT_API;
+const apiUrl = () => process.env.SLIDE_API || settings.get().apiUrl || DEFAULT_API;
 const parseVer = v => String(v || '0').replace(/^v/i, '').split('-')[0].split('.').map(n => parseInt(n, 10) || 0);
 function cmpVer(a, b) { const x = parseVer(a), y = parseVer(b); for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d < 0 ? -1 : 1; } return 0; }
 const readState = () => { try { return JSON.parse(fs.readFileSync(P.stateFile, 'utf8')); } catch { return { current: null, previous: null }; } };
@@ -37,7 +37,7 @@ async function http(url, opts = {}) { // small retry: GitHub's CDN occasionally 
 }
 async function http1(url, opts = {}) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), opts.timeout || 20000);
-  const init = { signal: ctl.signal, redirect: 'follow', headers: { 'User-Agent': 'KingdomsOfWar-Launcher/' + LAUNCHER_VERSION, Accept: opts.accept || 'application/vnd.github+json' } };
+  const init = { signal: ctl.signal, redirect: 'follow', headers: { 'User-Agent': 'Slide-Launcher/' + LAUNCHER_VERSION, Accept: opts.accept || 'application/vnd.github+json' } };
   try {
     let r;
     // Node's fetch first (one connection per host). Chromium's net.fetch is the fallback (OS certificate store / proxy settings):
@@ -50,13 +50,13 @@ async function http1(url, opts = {}) {
 }
 
 // ---------------------------------------------------------------- check
-const REPO_URL = 'https://github.com/piwadev/kingdoms-of-war';
+const REPO_URL = 'https://github.com/piwadev/slide';
 // The unauthenticated REST API is limited to 60 requests/hour per IP. If it fails (rate limit, API outage) fall back to the
 // plain download URLs, which are not rate limited: releases/latest/download/manifest.json (same data, notes included).
 async function latestRelease() {
   try { return await (await http(apiUrl())).json(); }
   catch (e) {
-    if (process.env.KOW_API || settings.get().apiUrl) throw e;
+    if (process.env.SLIDE_API || settings.get().apiUrl) throw e;
     log.warn('releases API failed, using manifest fallback:', e.message);
     const manifest = await (await http(REPO_URL + '/releases/latest/download/manifest.json', { accept: 'application/octet-stream' })).json();
     const tag = 'v' + manifest.version, dl = f => `${REPO_URL}/releases/download/${tag}/${f}`;
@@ -138,7 +138,7 @@ async function installFromZip(zipFile, version, onProgress) {
 }
 
 async function install(latest, onProgress) {
-  const zipFile = path.join(P.downloadsDir, `kow-game-${latest.version}.zip`);
+  const zipFile = path.join(P.downloadsDir, `slide-game-${latest.version}.zip`);
   await download(latest.game.url, zipFile, latest.game.sha256, onProgress);
   onProgress && onProgress({ phase: 'extract', got: 0, total: 1 });
   await installFromZip(zipFile, latest.version, onProgress);
@@ -148,7 +148,7 @@ async function install(latest, onProgress) {
 
 // first run / offline: install the game version bundled inside the launcher
 async function seedBundled(onProgress) {
-  if (!RESOURCES || process.env.KOW_NO_BUNDLE) return null;
+  if (!RESOURCES || process.env.SLIDE_NO_BUNDLE) return null;
   const dir = path.join(RESOURCES, 'bundled'); const meta = path.join(dir, 'bundled.json'); if (!fs.existsSync(meta)) return null;
   const b = JSON.parse(fs.readFileSync(meta, 'utf8')); const cur = installedInfo().current;
   if (cur && cmpVer(cur, b.version) >= 0) return null;
@@ -164,7 +164,7 @@ function rollback() {
 
 // ---------------------------------------------------------------- launcher self-update
 async function downloadLauncher(l, onProgress) {
-  const f = path.join(P.downloadsDir, `KingdomsOfWar-Launcher-Setup-${l.version}.exe`);
+  const f = path.join(P.downloadsDir, `SLIDE-Launcher-Setup-${l.version}.exe`);
   await download(l.url, f, l.sha256, onProgress); return f;
 }
 

@@ -14,7 +14,7 @@ exports.default = async function (ctx) {
     ResEdit.Resource.IconGroupEntry.replaceIconsForResource(res.entries, 1, 1033, ico.icons.map(i => i.data));
     const vi = ResEdit.Resource.VersionInfo.fromEntries(res.entries)[0];
     if (vi) { const v = ctx.packager.appInfo.version.split('.').map(Number); vi.setFileVersion(v[0], v[1], v[2], 0, 1033); vi.setProductVersion(v[0], v[1], v[2], 0, 1033);
-      vi.setStringValues({ lang: 1033, codepage: 1200 }, { FileDescription: 'Kingdoms of War Launcher', ProductName: 'Kingdoms of War Launcher', CompanyName: 'piwadev', LegalCopyright: 'piwadev', OriginalFilename: 'Kingdoms of War Launcher.exe', InternalName: 'Kingdoms of War Launcher' }); vi.outputToResourceEntries(res.entries); }
+      vi.setStringValues({ lang: 1033, codepage: 1200 }, { FileDescription: 'SLIDE Launcher', ProductName: 'SLIDE Launcher', CompanyName: 'piwadev', LegalCopyright: 'piwadev', OriginalFilename: 'SLIDE Launcher.exe', InternalName: 'SLIDE Launcher' }); vi.outputToResourceEntries(res.entries); }
     res.outputResource(e); fs.writeFileSync(exe, Buffer.from(e.generate())); console.log('  • afterPack: icon embedded');
   } catch (err) { console.log('  • afterPack: icon embedding skipped:', err.message); }
 };

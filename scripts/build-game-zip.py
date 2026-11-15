@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Build the game-only update package: release/out/kow-game-<version>.zip + .sha256 + manifest.json.
+"""Build the game-only update package: release/out/slide-game-<version>.zip + .sha256 + manifest.json.
 Usage: build-game-zip.py [--launcher-json release/launcher.json] [--notes-file F]
 Only the web game files are packaged (no Electron, no launcher, no docs/screenshots)."""
 import argparse, hashlib, json, os, sys, zipfile, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INCLUDE_FILES = ['index.html', 'version.json']
-INCLUDE_DIRS = ['css', 'js', 'assets']
+INCLUDE_DIRS = ['css', 'js', 'fonts', 'assets']
 SKIP_EXT = ('.md', '.map', '.DS_Store')
 
 def sha256(path):
@@ -24,7 +24,7 @@ def main():
     a = ap.parse_args()
     version = json.load(open(os.path.join(ROOT, 'version.json')))['version']
     os.makedirs(a.out, exist_ok=True)
-    name = f'kow-game-{version}.zip'
+    name = f'slide-game-{version}.zip'
     zpath = os.path.join(a.out, name)
     files = list(INCLUDE_FILES)
     for d in INCLUDE_DIRS:

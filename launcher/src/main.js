@@ -1,4 +1,4 @@
-// Kingdoms of War Launcher — Electron main process.
+// SLIDE Launcher — Electron main process.
 const { app, BrowserWindow, protocol, net, Menu, shell, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -12,8 +12,8 @@ const settings = require('./settings');
 const saves = require('./saves');
 const updater = require('./updater');
 
-const TEST = !!process.env.KOW_TEST;
-protocol.registerSchemesAsPrivileged([{ scheme: 'kow', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
+const TEST = !!process.env.SLIDE_TEST;
+protocol.registerSchemesAsPrivileged([{ scheme: 'slide', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 updater.init(app.getVersion(), process.resourcesPath || path.join(__dirname, '..', 'resources'));
 if (!app.isPackaged && fs.existsSync(path.join(__dirname, '..', 'resources', 'bundled'))) updater.init(app.getVersion(), path.join(__dirname, '..', 'resources'));
 
@@ -23,12 +23,12 @@ const send = (ch, payload) => { if (win && !win.isDestroyed()) win.webContents.s
 const setStatus = s => { status = s; send('l:status', status); };
 const refreshCurrent = () => { currentDir = updater.installedInfo().dir; };
 const pickPath = (kind, opts) => { // dialogs, with env overrides so the app can be driven by automated tests
-  if (process.env.KOW_TEST_PATH) return process.env.KOW_TEST_PATH;
+  if (process.env.SLIDE_TEST_PATH) return process.env.SLIDE_TEST_PATH;
   return null;
 };
 const confirm = async (message, detail) => {
   if (TEST) return true;
-  const r = await dialog.showMessageBox(win, { type: 'question', buttons: ['Continue', 'Cancel'], defaultId: 1, cancelId: 1, title: 'Kingdoms of War', message, detail, noLink: true });
+  const r = await dialog.showMessageBox(win, { type: 'question', buttons: ['Continue', 'Cancel'], defaultId: 1, cancelId: 1, title: 'SLIDE', message, detail, noLink: true });
   return r.response === 0;
 };
 const ts = () => new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14).replace(/^(\d{8})(\d{6})$/, '$1-$2');
@@ -38,19 +38,19 @@ function openGame() {
   if (gameWin) { gameWin.focus(); return { ok: true }; }
   refreshCurrent(); if (!currentDir) return { ok: false, error: 'The game is not installed yet.' };
   gameWin = new BrowserWindow({
-    width: 1280, height: 800, minWidth: 800, minHeight: 500, backgroundColor: '#0d1626', title: 'Kingdoms of War', autoHideMenuBar: true, show: false,
+    width: 1280, height: 800, minWidth: 800, minHeight: 500, backgroundColor: '#0b0b0d', title: 'SLIDE', autoHideMenuBar: true, show: false,
     webPreferences: { preload: path.join(__dirname, 'preload-game.js'), backgroundThrottling: false, contextIsolation: true, sandbox: true },
   });
   const gw = gameWin; gw.once('ready-to-show', () => gw.show());
   gw.webContents.setWindowOpenHandler(({ url }) => { if (/^https:\/\//.test(url)) shell.openExternal(url); return { action: 'deny' }; });
-  gw.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('kow://')) e.preventDefault(); });
+  gw.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('slide://')) e.preventDefault(); });
   gw.webContents.on('before-input-event', (e, input) => {
     if (input.type !== 'keyDown') return;
     if (input.key === 'F11') gw.setFullScreen(!gw.isFullScreen());
-    if (input.key === 'F12' && (TEST || process.env.KOW_DEBUG)) gw.webContents.toggleDevTools();
+    if (input.key === 'F12' && (TEST || process.env.SLIDE_DEBUG)) gw.webContents.toggleDevTools();
   });
   if (TEST) gw.webContents.on('console-message', (_e, level, message) => { if (level >= 2) log.warn('[game console]', message); });
-  gw.loadURL('kow://game/index.html');
+  gw.loadURL('slide://game/index.html');
   if (win && !win.isDestroyed()) { if (settings.get().closeLauncherOnPlay) win.hide(); else win.minimize(); }
   gw.on('closed', async () => {
     gameWin = null; saves.backupNow('save');
@@ -63,8 +63,8 @@ function openGame() {
 // ------------------------------------------------------------------ launcher window
 function createWindow() {
   win = new BrowserWindow({
-    width: 1040, height: 660, minWidth: 960, minHeight: 620, backgroundColor: '#0a101c', title: 'Kingdoms of War Launcher', autoHideMenuBar: true, show: false,
-    titleBarStyle: 'hidden', titleBarOverlay: { color: '#0a101c', symbolColor: '#c7d3ea', height: 38 },
+    width: 1040, height: 660, minWidth: 960, minHeight: 620, backgroundColor: '#09090b', title: 'SLIDE Launcher', autoHideMenuBar: true, show: false,
+    titleBarStyle: 'hidden', titleBarOverlay: { color: '#09090b', symbolColor: '#c7d3ea', height: 38 },
     webPreferences: { preload: path.join(__dirname, 'preload-launcher.js'), contextIsolation: true, sandbox: true },
   });
   Menu.setApplicationMenu(null);
@@ -129,13 +129,13 @@ function registerIpc() {
   H('l:rollback', async () => { if (gameWin) return { ok: false, error: 'Close the game first.' }; if (!(await confirm('Switch back to the previous game version?', 'Your save is not affected.'))) return { ok: false, cancelled: true }; updater.rollback(); refreshCurrent(); if (latest) latest.updateAvailable = updater.cmpVer(latest.version, updater.installedInfo().current || '0') > 0; setStatus(latest && latest.updateAvailable ? { state: 'update', message: `Update ${latest.version} is available.` } : { state: 'uptodate', message: 'Rolled back.' }); return { ok: true, state: fullState() }; });
   H('l:openSaves', async () => { fs.mkdirSync(P.savesDir, { recursive: true }); const r = await shell.openPath(P.savesDir); return r ? { ok: false, error: r } : { ok: true }; });
   H('l:backupSave', async () => {
-    let f = pickPath('save'); if (!f) { const r = await dialog.showSaveDialog(win, { title: 'Back up save', defaultPath: path.join(app.getPath('documents'), `KingdomsOfWar-save-${ts()}.json`), filters: [{ name: 'Kingdoms of War save', extensions: ['json'] }] }); if (r.canceled) return { ok: false, cancelled: true }; f = r.filePath; }
-    if (fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, `KingdomsOfWar-save-${ts()}.json`);
+    let f = pickPath('save'); if (!f) { const r = await dialog.showSaveDialog(win, { title: 'Back up save', defaultPath: path.join(app.getPath('documents'), `Slide-save-${ts()}.json`), filters: [{ name: 'SLIDE save', extensions: ['json'] }] }); if (r.canceled) return { ok: false, cancelled: true }; f = r.filePath; }
+    if (fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, `Slide-save-${ts()}.json`);
     saves.exportTo(f); return { ok: true, file: f };
   });
   H('l:restoreSave', async () => {
     if (gameWin) return { ok: false, error: 'Close the game before restoring a save.' };
-    let f = pickPath('open'); if (!f) { const r = await dialog.showOpenDialog(win, { title: 'Restore save', properties: ['openFile'], filters: [{ name: 'Kingdoms of War save', extensions: ['json'] }] }); if (r.canceled || !r.filePaths[0]) return { ok: false, cancelled: true }; f = r.filePaths[0]; }
+    let f = pickPath('open'); if (!f) { const r = await dialog.showOpenDialog(win, { title: 'Restore save', properties: ['openFile'], filters: [{ name: 'SLIDE save', extensions: ['json'] }] }); if (r.canceled || !r.filePaths[0]) return { ok: false, cancelled: true }; f = r.filePaths[0]; }
     const err = saves.validate(fs.readFileSync(f, 'utf8')); if (err) return { ok: false, error: 'That file is ' + err + '.' };
     if (!(await confirm('Replace your current save with this file?', 'Your current save is backed up automatically first (see the saves folder → backups).'))) return { ok: false, cancelled: true };
     saves.importFrom(f); send('l:state-changed'); return { ok: true, file: f };
@@ -143,12 +143,12 @@ function registerIpc() {
   H('l:cloudBackup', async () => { const f = saves.cloudBackup(settings.get().cloudDir); send('l:toast', { kind: 'good', text: 'Backed up to ' + f }); return { ok: true, file: f }; });
   H('l:cloudRestore', async () => {
     if (gameWin) return { ok: false, error: 'Close the game before restoring a save.' };
-    const f = saves.cloudLatest(settings.get().cloudDir); if (!f) return { ok: false, error: 'No backup found in the cloud folder (KingdomsOfWar-save-latest.json).' };
+    const f = saves.cloudLatest(settings.get().cloudDir); if (!f) return { ok: false, error: 'No backup found in the cloud folder (Slide-save-latest.json).' };
     if (!(await confirm('Restore the latest cloud backup?', f + '\nYour current save is backed up first.'))) return { ok: false, cancelled: true };
     saves.importFrom(f); send('l:state-changed'); return { ok: true, file: f };
   });
   H('l:chooseCloudDir', async () => {
-    let d = process.env.KOW_TEST_DIR || null; if (!d) { const r = await dialog.showOpenDialog(win, { title: 'Choose a cloud backup folder (e.g. inside Google Drive or OneDrive)', properties: ['openDirectory', 'createDirectory'] }); if (r.canceled || !r.filePaths[0]) return { ok: false, cancelled: true }; d = r.filePaths[0]; }
+    let d = process.env.SLIDE_TEST_DIR || null; if (!d) { const r = await dialog.showOpenDialog(win, { title: 'Choose a cloud backup folder (e.g. inside Google Drive or OneDrive)', properties: ['openDirectory', 'createDirectory'] }); if (r.canceled || !r.filePaths[0]) return { ok: false, cancelled: true }; d = r.filePaths[0]; }
     settings.set({ cloudDir: d }); return { ok: true, dir: d, state: fullState() };
   });
   H('l:setSettings', p => { settings.set(p || {}); return fullState(); });
@@ -163,17 +163,17 @@ function registerIpc() {
   });
   // game bridge (synchronous, only for the game window)
   const fromGame = e => gameWin && e.sender === gameWin.webContents;
-  ipcMain.on('kow:loadSave', e => { e.returnValue = fromGame(e) ? saves.load() : null; });
-  ipcMain.on('kow:saveSync', (e, text, reason) => { try { e.returnValue = fromGame(e) ? saves.save(text, reason) : false; } catch (err) { log.error('save failed', err); e.returnValue = false; } });
-  ipcMain.on('kow:resetSave', e => { e.returnValue = fromGame(e) ? saves.reset() : false; });
-  ipcMain.on('kow:info', e => { e.returnValue = fromGame(e) ? saves.info() : null; });
+  ipcMain.on('slide:loadSave', e => { e.returnValue = fromGame(e) ? saves.load() : null; });
+  ipcMain.on('slide:saveSync', (e, text, reason) => { try { e.returnValue = fromGame(e) ? saves.save(text, reason) : false; } catch (err) { log.error('save failed', err); e.returnValue = false; } });
+  ipcMain.on('slide:resetSave', e => { e.returnValue = fromGame(e) ? saves.reset() : false; });
+  ipcMain.on('slide:info', e => { e.returnValue = fromGame(e) ? saves.info() : null; });
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', () => { const w = win || gameWin; if (w) { if (w.isMinimized()) w.restore(); w.show(); w.focus(); } });
   app.whenReady().then(() => {
-    protocol.handle('kow', req => {
+    protocol.handle('slide', req => {
       if (!currentDir) return new Response('Game not installed', { status: 404 });
       const u = new URL(req.url); let p = decodeURIComponent(u.pathname); if (p === '/' || p === '') p = '/index.html';
       const f = path.normalize(path.join(currentDir, p));

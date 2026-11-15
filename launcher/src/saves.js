@@ -11,7 +11,7 @@ const ensure = () => { fs.mkdirSync(P.backupsDir, { recursive: true }); };
 
 function validate(text) {
   let j; try { j = JSON.parse(text); } catch { return 'not valid JSON'; }
-  if (!j || typeof j !== 'object' || typeof j.v !== 'number' || !j.res || !Array.isArray(j.buildings)) return 'not a Kingdoms of War save';
+  if (!j || typeof j !== 'object' || typeof j.v !== 'number' || typeof j.level !== 'number' || !j.owned || typeof j.owned !== 'object') return 'not a SLIDE save';
   return null;
 }
 function atomicWrite(file, text) {
@@ -62,9 +62,9 @@ function cloudBackup(dir) {
   if (!dir) throw new Error('Choose a cloud backup folder first (Settings).');
   const t = load(); if (!t) throw new Error('There is no save to back up yet.');
   fs.mkdirSync(dir, { recursive: true });
-  const name = `KingdomsOfWar-save-${ts()}.json`; atomicWrite(path.join(dir, name), t); atomicWrite(path.join(dir, 'KingdomsOfWar-save-latest.json'), t);
-  try { const old = fs.readdirSync(dir).filter(f => /^KingdomsOfWar-save-\d{8}-\d{6}\.json$/.test(f)).sort().reverse(); for (const f of old.slice(10)) fs.unlinkSync(path.join(dir, f)); } catch { /* ignore */ }
+  const name = `Slide-save-${ts()}.json`; atomicWrite(path.join(dir, name), t); atomicWrite(path.join(dir, 'Slide-save-latest.json'), t);
+  try { const old = fs.readdirSync(dir).filter(f => /^Slide-save-\d{8}-\d{6}\.json$/.test(f)).sort().reverse(); for (const f of old.slice(10)) fs.unlinkSync(path.join(dir, f)); } catch { /* ignore */ }
   return path.join(dir, name);
 }
-function cloudLatest(dir) { const f = path.join(dir || '', 'KingdomsOfWar-save-latest.json'); return dir && fs.existsSync(f) ? f : null; }
+function cloudLatest(dir) { const f = path.join(dir || '', 'Slide-save-latest.json'); return dir && fs.existsSync(f) ? f : null; }
 module.exports = { load, save, reset, info, exportTo, importFrom, cloudBackup, cloudLatest, validate, backupNow, listBackups };

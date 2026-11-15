@@ -16,7 +16,7 @@ function buildVersion(ver, mutate) {
   fs.writeFileSync(path.join(d, 'version.json'), JSON.stringify({ version: ver }));
   if (mutate) mutate(d);
   execFileSync('python3', [path.join(d, 'scripts/build-game-zip.py'), '--launcher-json', '/nonexistent', '--out', path.join(TMP, 'out-' + ver)], { stdio: 'pipe' });
-  const o = path.join(TMP, 'out-' + ver); return { dir: o, zip: path.join(o, `kow-game-${ver}.zip`), manifest: JSON.parse(fs.readFileSync(path.join(o, 'manifest.json'))) };
+  const o = path.join(TMP, 'out-' + ver); return { dir: o, zip: path.join(o, `slide-game-${ver}.zip`), manifest: JSON.parse(fs.readFileSync(path.join(o, 'manifest.json'))) };
 }
 const R = { '4.0.0': buildVersion('4.0.0'), '4.0.1': buildVersion('4.0.1', d => fs.appendFileSync(path.join(d, 'index.html'), '\n<!-- v4.0.1 marker -->\n')) };
 let serve = '4.0.0', tamper = false, hits = [];
@@ -24,7 +24,7 @@ const srv = http.createServer((req, res) => {
   hits.push(req.url); const port = srv.address().port, base = `http://127.0.0.1:${port}`;
   if (req.url === '/api/latest') {
     const v = serve, r = R[v]; res.setHeader('content-type', 'application/json');
-    return res.end(JSON.stringify({ tag_name: 'v' + v, name: 'Kingdoms of War ' + v, published_at: new Date().toISOString(), html_url: 'https://github.com/piwadev/kingdoms-of-war/releases/tag/v' + v,
+    return res.end(JSON.stringify({ tag_name: 'v' + v, name: 'SLIDE ' + v, published_at: new Date().toISOString(), html_url: 'https://github.com/piwadev/slide/releases/tag/v' + v,
       body: `## What's new in ${v}\n- **Launcher test** release notes for ${v}\n- Second \`bullet\` <b>escaped</b>`,
       assets: [{ name: 'manifest.json', browser_download_url: `${base}/dl/${v}/manifest.json`, size: 100 }, { name: r.manifest.game.file, browser_download_url: `${base}/dl/${v}/${r.manifest.game.file}`, size: r.manifest.game.size }] }));
   }
@@ -39,11 +39,11 @@ const srv = http.createServer((req, res) => {
 await new Promise(r => srv.listen(0, '127.0.0.1', r)); const API = `http://127.0.0.1:${srv.address().port}/api/latest`;
 
 const ROAM = path.join(TMP, 'roaming'), LOCAL = path.join(TMP, 'local'), CLOUD = path.join(TMP, 'cloud-folder'), EXPORT = path.join(TMP, 'export.json');
-const SAVE = path.join(ROAM, 'saves', 'kow_save.json');
+const SAVE = path.join(ROAM, 'saves', 'slide_save.json');
 async function start(env = {}) {
   const app = await _electron.launch({ executablePath: path.join(ROOT, 'node_modules/electron/dist/electron'), cwd: ROOT,
     args: ['.', '--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
-    env: { ...process.env, KOW_TEST: '1', KOW_NO_BUNDLE: '1', KOW_ROAMING: ROAM, KOW_LOCAL: LOCAL, KOW_API: API, ...env } });
+    env: { ...process.env, SLIDE_TEST: '1', SLIDE_NO_BUNDLE: '1', SLIDE_ROAMING: ROAM, SLIDE_LOCAL: LOCAL, SLIDE_API: API, ...env } });
   const launcher = await app.firstWindow(); const errors = []; launcher.on('pageerror', e => errors.push('launcher: ' + e)); launcher.on('console', m => { if (m.type() === 'error') errors.push('launcher console: ' + m.text()); });
   await launcher.waitForLoadState('domcontentloaded'); return { app, launcher, errors };
 }
@@ -56,7 +56,7 @@ async function playGame(app, launcher) {
   await game.waitForLoadState('domcontentloaded'); await game.addStyleTag({ content: '.mback,.modal,.ctx.enter,.toast{animation:none!important}' }).catch(() => {});
   await game.waitForSelector('#playBtn:not([disabled])', { timeout: 120000 }); return { game, errs };
 }
-const closeGame = async (app, game) => { const c = game.waitForEvent('close'); await app.evaluate(({ BrowserWindow }) => { BrowserWindow.getAllWindows().filter(w => w.getTitle() === 'Kingdoms of War').forEach(w => w.close()); }); await c; await sleep(500); };
+const closeGame = async (app, game) => { const c = game.waitForEvent('close'); await app.evaluate(({ BrowserWindow }) => { BrowserWindow.getAllWindows().filter(w => w.getTitle() === 'SLIDE').forEach(w => w.close()); }); await c; await sleep(500); };
 
 try {
   // ================= 1. fresh install: update check + download + verify + extract
@@ -69,14 +69,14 @@ try {
   ok('1c. release notes rendered (and HTML escaped)', (await launcher.locator('#notes').innerHTML()).includes('&lt;b&gt;escaped&lt;/b&gt;') && (await txt(launcher, 'notesVer')) === 'v4.0.0');
   await launcher.screenshot({ path: path.join(TMP, 'launcher-1.png') });
 
-  // ================= 2. play: game loads from kow://, zero console errors, save written to file
+  // ================= 2. play: game loads from slide://, zero console errors, save written to file
   const { game, errs } = await playGame(app, launcher);
-  ok('2. game window served from kow:// protocol', game.url().startsWith('kow://game/'), game.url());
-  ok('2b. native bridge present in the game', await game.evaluate(() => !!window.kowNative && typeof window.kowNative.saveSync === 'function'));
+  ok('2. game window served from slide:// protocol', game.url().startsWith('slide://game/'), game.url());
+  ok('2b. native bridge present in the game', await game.evaluate(() => !!window.slideNative && typeof window.slideNative.saveSync === 'function'));
   await game.click('#playBtn'); await sleep(2500);
   const t0 = Date.now(); while (!fs.existsSync(SAVE) && Date.now() - t0 < 40000) await sleep(500);
   ok('2c. save file written to saves folder', fs.existsSync(SAVE), SAVE);
-  ok('2d. nothing written to localStorage in launcher mode', await game.evaluate(() => localStorage.getItem('kow_save_v1') === null));
+  ok('2d. nothing written to localStorage in launcher mode', await game.evaluate(() => localStorage.getItem('slide_save_v1') === null));
   await sleep(1500); await game.screenshot({ path: path.join(TMP, 'game-play.png') });
   await closeGame(app, game);
   ok('2e. zero console/page errors in the game window', errs.length === 0, errs.slice(0, 3).join(' | '));
@@ -85,14 +85,14 @@ try {
   const nBackups = fs.readdirSync(path.join(ROAM, 'saves/backups')).length; ok('2g. rotating backup created on exit', nBackups >= 1, nBackups + ' backup(s)');
 
   // ================= 3. export / import + cloud backup (via launcher UI, dialogs stubbed by env)
-  await app.close(); ({ app, launcher, errors } = await start({ KOW_TEST_PATH: EXPORT, KOW_TEST_DIR: CLOUD }));
+  await app.close(); ({ app, launcher, errors } = await start({ SLIDE_TEST_PATH: EXPORT, SLIDE_TEST_DIR: CLOUD }));
   await waitStatus(launcher, /up to date/i);
   await launcher.click('#btnBackup'); await sleep(800);
   ok('3. "Back up save" exports an identical JSON copy', fs.existsSync(EXPORT) && sha(EXPORT) === saveHash1);
   await launcher.click('#btnSettings'); await launcher.click('#btnChooseCloud'); await sleep(500); await launcher.click('#sAutoCloud');
   await launcher.screenshot({ path: path.join(TMP, 'launcher-settings.png') }); await launcher.click('#btnCloseSettings');
   await launcher.click('#btnCloud'); await sleep(800);
-  ok('3b. "Cloud backup" writes to the chosen folder (+latest file)', fs.existsSync(path.join(CLOUD, 'KingdomsOfWar-save-latest.json')) && fs.readdirSync(CLOUD).length === 2, fs.readdirSync(CLOUD).join(', '));
+  ok('3b. "Cloud backup" writes to the chosen folder (+latest file)', fs.existsSync(path.join(CLOUD, 'Slide-save-latest.json')) && fs.readdirSync(CLOUD).length === 2, fs.readdirSync(CLOUD).join(', '));
   // corrupt the live save, restore from the exported file
   fs.writeFileSync(SAVE, '{"corrupt":true}'); await sleep(100);
   await launcher.click('#btnRestore'); await sleep(800);
@@ -129,7 +129,7 @@ try {
   // ================= 6. tampered download rejected
   fs.rmSync(path.join(LOCAL, 'game', '4.0.1'), { recursive: true }); fs.writeFileSync(path.join(LOCAL, 'state.json'), JSON.stringify({ current: '4.0.0', previous: null }));
   tamper = true; await launcher.click('#btnCheck'); await waitStatus(launcher, /available/i, 15000); await launcher.click('#btnUpdate'); const es = await waitStatus(launcher, /checksum mismatch/i, 30000);
-  ok('6. checksum mismatch rejected, nothing installed', !fs.existsSync(path.join(LOCAL, 'game/4.0.1')) && JSON.parse(fs.readFileSync(path.join(LOCAL, 'state.json'))).current === '4.0.0' && !fs.existsSync(path.join(LOCAL, 'downloads/kow-game-4.0.1.zip')), es.slice(0, 60));
+  ok('6. checksum mismatch rejected, nothing installed', !fs.existsSync(path.join(LOCAL, 'game/4.0.1')) && JSON.parse(fs.readFileSync(path.join(LOCAL, 'state.json'))).current === '4.0.0' && !fs.existsSync(path.join(LOCAL, 'downloads/slide-game-4.0.1.zip')), es.slice(0, 60));
   tamper = false;
   ok('6b. launcher UI has no JS errors', errors.length === 0, errors.join(' | '));
   await app.close();
@@ -142,16 +142,16 @@ try {
   await app.close();
 
   // ================= 8. localStorage -> file migration
-  const ROAM2 = path.join(TMP, 'roaming2'), LOCAL2 = path.join(TMP, 'local2'); const env2 = { KOW_ROAMING: ROAM2, KOW_LOCAL: LOCAL2, KOW_API: 'http://127.0.0.1:1/x', KOW_NO_BUNDLE: '' };
+  const ROAM2 = path.join(TMP, 'roaming2'), LOCAL2 = path.join(TMP, 'local2'); const env2 = { SLIDE_ROAMING: ROAM2, SLIDE_LOCAL: LOCAL2, SLIDE_API: 'http://127.0.0.1:1/x', SLIDE_NO_BUNDLE: '' };
   const bundle = path.join(ROOT, 'resources/bundled'); // use the bundled game here (also tests offline first-run seeding)
   ({ app, launcher, errors } = await start(env2)); await sleep(3000);
   await waitStatus(launcher, /could not reach|installed/i, 20000);
   ok('8. offline first run seeds the bundled game', fs.existsSync(bundle) ? (await txt(launcher, 'vInstalled')) === 'v4.0.0' : true, await txt(launcher, 'vInstalled'));
   let g3 = await playGame(app, launcher); const legacy = JSON.stringify({ ...saveObj, res: { ...saveObj.res, gold: 777777 } });
-  await g3.game.evaluate(t => localStorage.setItem('kow_save_v1', t), legacy); await closeGame(app, g3.game); await app.close();
+  await g3.game.evaluate(t => localStorage.setItem('slide_save_v1', t), legacy); await closeGame(app, g3.game); await app.close();
   fs.rmSync(path.join(ROAM2, 'saves'), { recursive: true, force: true });
   ({ app, launcher, errors } = await start(env2)); await sleep(1500); g3 = await playGame(app, launcher); await g3.game.click('#playBtn'); await sleep(1500);
-  const migrated = fs.existsSync(path.join(ROAM2, 'saves/kow_save.json')) ? fs.readFileSync(path.join(ROAM2, 'saves/kow_save.json'), 'utf8') : '';
+  const migrated = fs.existsSync(path.join(ROAM2, 'saves/slide_save.json')) ? fs.readFileSync(path.join(ROAM2, 'saves/slide_save.json'), 'utf8') : '';
   ok('8b. existing localStorage save migrated into the save file', migrated.includes('777777'), migrated.slice(0, 40));
   await closeGame(app, g3.game); await app.close();
 } catch (e) { failed++; console.log('TEST ERROR', e); }

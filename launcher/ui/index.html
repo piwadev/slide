@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'">
-<title>Kingdoms of War Launcher</title>
+<title>SLIDE Launcher</title>
 <link rel="stylesheet" href="launcher.css">
 </head><body>
 <div class="bg"></div>
 <header class="titlebar">
-  <div class="brand"><svg class="crest" viewBox="0 0 64 64"><path d="M8 52V22l12 9 12-20 12 20 12-9v30z" fill="#ffcf3f" stroke="#7a5a10" stroke-width="3" stroke-linejoin="round"/><rect x="8" y="48" width="48" height="6" fill="#ff5a4d"/></svg><span>KINGDOMS OF WAR</span><em>LAUNCHER</em></div>
+  <div class="brand"><span class="logo">SLIDE</span><em>LAUNCHER</em></div>
   <div class="tb-right"><span id="lver" class="dim"></span><button id="btnSettings" class="icon" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm8.4 5.2l1.6 1.2-2 3.5-1.9-.7a7.8 7.8 0 01-1.7 1l-.3 2h-4l-.3-2a7.8 7.8 0 01-1.7-1l-1.9.7-2-3.5 1.6-1.2a8 8 0 010-2l-1.6-1.2 2-3.5 1.9.7a7.8 7.8 0 011.7-1l.3-2h4l.3 2a7.8 7.8 0 011.7 1l1.9-.7 2 3.5-1.6 1.2a8 8 0 010 2z" transform="translate(-1 -1) scale(1.08)" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button></div>
 </header>
 
@@ -14,8 +14,8 @@
   <section class="left">
     <div class="hero">
       <div class="hero-txt">
-        <div class="eyebrow">Fantasy base-building strategy</div>
-        <h1>Build. Train.<br><span>Conquer.</span></h1>
+        <div class="eyebrow">Street drift racing</div>
+        <h1>Get sideways.<br><span>Stay stylish.</span></h1>
       </div>
       <div class="banner" id="launcherBanner" hidden><span id="bannerText"></span><button id="btnUpdLauncher" class="mini gold">Update launcher</button></div>
     </div>
@@ -37,16 +37,6 @@
       <button id="btnCheck" class="btn">Check for updates</button>
     </div>
 
-    <div class="savebox">
-      <div class="sb-head"><h3>Your save</h3><span id="saveInfo" class="dim"></span></div>
-      <div class="sb-btns">
-        <button id="btnOpenSaves" class="btn sm">Open save folder</button>
-        <button id="btnBackup" class="btn sm">Back up save</button>
-        <button id="btnRestore" class="btn sm">Restore save</button>
-        <button id="btnCloud" class="btn sm cloud">Cloud backup</button>
-      </div>
-      <p class="hint">Saves live outside the game folder and are never touched by updates. The last 5 versions are kept automatically.</p>
-    </div>
   </section>
 
   <aside class="right">
@@ -64,10 +54,21 @@
       <label class="row"><span><b>Install updates automatically</b><small>Otherwise you confirm with the Update button.</small></span><input type="checkbox" id="sAutoInstall"></label>
       <label class="row"><span><b>Hide launcher while playing</b><small>Otherwise it minimizes and returns when you quit the game.</small></span><input type="checkbox" id="sHide"></label>
       <div class="sep"></div>
+    <div class="savebox inset">
+      <div class="sb-head"><h3>Your save</h3><span id="saveInfo" class="dim"></span></div>
+      <div class="sb-btns">
+        <button id="btnOpenSaves" class="btn sm">Open save folder</button>
+        <button id="btnBackup" class="btn sm">Back up save</button>
+        <button id="btnRestore" class="btn sm">Restore save</button>
+        <button id="btnCloud" class="btn sm cloud">Cloud backup</button>
+      </div>
+      <p class="hint">Saves live outside the game folder and are never touched by updates. The last 5 versions are kept automatically.</p>
+    </div>
+      <div class="sep"></div>
       <div class="row col"><span><b>Cloud backup folder</b><small>Pick a folder synced by Google Drive, OneDrive or Dropbox. No account or server needed.</small></span>
         <div class="pathrow"><code id="sCloudDir">Not set</code><button id="btnChooseCloud" class="btn sm">Choose…</button></div></div>
       <label class="row"><span><b>Back up to the cloud folder when I quit the game</b><small>Keeps the 10 most recent copies plus a "latest" file.</small></span><input type="checkbox" id="sAutoCloud"></label>
-      <div class="row"><span><b>Restore from cloud folder</b><small>Replaces the local save with KingdomsOfWar-save-latest.json (current save is backed up first).</small></span><button id="btnCloudRestore" class="btn sm">Restore</button></div>
+      <div class="row"><span><b>Restore from cloud folder</b><small>Replaces the local save with Slide-save-latest.json (current save is backed up first).</small></span><button id="btnCloudRestore" class="btn sm">Restore</button></div>
       <div class="sep"></div>
       <div class="row"><span><b>Previous game version</b><small id="rbInfo">None installed.</small></span><button id="btnRollback" class="btn sm">Roll back</button></div>
       <div class="row"><span><b>Logs</b><small id="pathInfo"></small></span><button id="btnLogs" class="btn sm">Open</button></div>
