@@ -132,7 +132,7 @@ export class GarageScene {
   // view presets: a=azimuth (rad, 0 = car nose), e=elevation, d=distance, h=target height, tx/tz target offset (car-local)
   preset(name) {
     const c = this.car; const L = c ? c.L : 4.5; const P = {
-      menu: { a: 0.62, e: 0.1, d: L * 2.15 + 0.7, h: 0.28, tx: 0, tz: 0 }, hero: { a: 0.62, e: 0.15, d: L * 2.0 + 0.6, h: 0.66, tx: 0, tz: 0 }, side: { a: 1.571, e: 0.06, d: L * 1.8, h: 0.6, tx: 0, tz: 0 }, front: { a: 0.0, e: 0.1, d: L * 1.5, h: 0.6, tx: 0, tz: 0 }, rear: { a: 3.14 + 0.45, e: 0.14, d: L * 1.5, h: 0.75, tx: 0, tz: 0 },
+      menu: { a: 0.62, e: 0.09, d: L * 2.5 + 0.8, h: 0.05, tx: 0, tz: 0 }, hero: { a: 0.62, e: 0.15, d: L * 2.0 + 0.6, h: 0.66, tx: 0, tz: 0 }, side: { a: 1.571, e: 0.06, d: L * 1.8, h: 0.6, tx: 0, tz: 0 }, front: { a: 0.0, e: 0.1, d: L * 1.5, h: 0.6, tx: 0, tz: 0 }, rear: { a: 3.14 + 0.45, e: 0.14, d: L * 1.5, h: 0.75, tx: 0, tz: 0 },
       wheelF: { a: 1.15, e: 0.08, d: 2.6, h: 0.38, tx: 0, tz: c ? this.model.geom.wzF : 1.4 }, wheelR: { a: 1.9, e: 0.08, d: 2.6, h: 0.38, tx: 0, tz: c ? this.model.geom.wzR : -1.4 }, top: { a: 0.6, e: 1.1, d: L * 1.9, h: 0.3, tx: 0, tz: 0 }, hood: { a: 0.25, e: 0.35, d: L * 1.2, h: 0.8, tx: 0, tz: L * 0.25 }, low: { a: 0.3, e: 0.03, d: L * 1.2, h: 0.4, tx: 0, tz: L * 0.3 },
     };
     return P[name] || P.hero;
