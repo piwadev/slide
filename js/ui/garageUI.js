@@ -17,7 +17,7 @@ export class GarageUI {
   get carId() { return this.P.save.selected; }
   open(root) {
     this.root = root; this.car = carById[this.carId]; this.saved = this.P.cfgOf(this.carId); this.draft = clone(this.saved); this.dirty = false;
-    this.app.garage.setCar(this.car, this.draft); this.app.garage.go('hero'); this.app.garage.setOffset(0.05);
+    this.app.garage.setCar(this.car, this.draft); this.app.garage.go('hero'); this.app.garage.setOffset(0.075);
     root.innerHTML = `<div class="screen garage-l"><div class="panel" style="padding:10px 14px"><div class="crow" style="padding:6px 8px;border:0;background:none;grid-template-columns:auto 1fr auto auto;align-items:center"><button class="btn sm ghost" data-a="prev">‹</button><div style="padding:0 8px"><b id="gName"></b><br><small id="gSub"></small></div><button class="btn sm ghost" data-a="next">›</button><button class="btn sm" data-a="sell" title="Sell this car">Sell</button></div></div>
       <div class="panel" style="flex:1"><div class="tabs">${TABS.map(([k, l]) => `<button class="tab" data-tab="${k}">${l}</button>`).join('')}</div><div class="gbody" id="gBody"></div></div></div>
       <div class="screen garage-r"><div class="panel card"><h2 class="t">Stats</h2><div id="gStats" class="sbars" style="grid-template-columns:1fr"></div><div id="gVal" style="margin-top:12px;font:600 12px 'Barlow Condensed';letter-spacing:.14em;color:var(--mt);text-transform:uppercase"></div></div>
