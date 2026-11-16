@@ -1,6 +1,7 @@
 // GARAGE screen: live-preview customisation (body, wheels, paint, vinyls, lights, performance, tune) with try-before-you-buy.
 import { $, $$, el, fmt, money, esc, clamp } from './dom.js';
 import { carById } from '../data/cars.js';
+import { MODEL_CREDITS } from '../data/models.js';
 import { PART_CATS, WHEEL_DESIGNS, TIRES, FINISHES, LIVERIES, STICKERS, STICKER_SLOTS, HEADLIGHTS, UNDERGLOW, FLAMES, PLATES, PERF, PERF_KEYS, statBars, defaultCfg } from '../data/parts.js';
 import { CATALOG } from '../core/progress.js';
 import { audio } from '../audio.js';
@@ -27,7 +28,7 @@ export class GarageUI {
     this.header(); this.renderTab(); this.stats(); this.buy();
   }
   close() { this.app.garage.setOffset(0); }
-  header() { $('#gName', this.root).textContent = `${this.car.make} ${this.car.name}`; $('#gSub', this.root).textContent = `${this.car.year} · ${this.car.drive} · ${this.car.hp} hp · ${Object.keys(this.P.save.owned).indexOf(this.carId) + 1}/${Object.keys(this.P.save.owned).length} owned`; $$('.tab', this.root).forEach(t => t.classList.toggle('on', t.dataset.tab === this.tab)); $$('#gCams .chip', this.root).forEach(c => c.classList.toggle('on', c.dataset.cam === this.cam)); }
+  header() { $('#gName', this.root).textContent = `${this.car.make} ${this.car.name}`; $('#gSub', this.root).textContent = `${this.car.year} · ${this.car.drive} · ${this.car.hp} hp · ${Object.keys(this.P.save.owned).indexOf(this.carId) + 1}/${Object.keys(this.P.save.owned).length} owned`; { const mc = MODEL_CREDITS[this.carId]; const el = $('#gSub', this.root); el.title = mc ? `3D model: ${mc.title} by ${mc.author} (${mc.license})` : ''; if (mc) el.textContent += ` · model by ${mc.author} (${mc.license})`; } $$('.tab', this.root).forEach(t => t.classList.toggle('on', t.dataset.tab === this.tab)); $$('#gCams .chip', this.root).forEach(c => c.classList.toggle('on', c.dataset.cam === this.cam)); }
   refresh3D() { if (this._raf) return; this._raf = requestAnimationFrame(() => { this._raf = 0; this.app.garage.refreshCar(this.draft); }); }
   // ---------------------------------------------------------------- ownership helpers
   unowned() {

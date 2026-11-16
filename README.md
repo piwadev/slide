@@ -2,7 +2,7 @@
 
 # SLIDE — Street Drift Racing
 
-A premium Japanese-street drifting game for the desktop. 3D garage, deep car customisation, 6 maps, 18 cars, a 30-event career and a full drift-scoring system — all procedural, no downloads of art assets, runs in its own window.
+A premium Japanese-street drifting game for the desktop. 3D garage, deep car customisation, 6 maps, 18 cars, a 30-event career and a full drift-scoring system — real 3D car models (see [CREDITS.md](CREDITS.md)), everything else procedural, runs in its own window.
 
 ## ⬇ Download (Windows)
 
@@ -12,14 +12,15 @@ Run the installer once (per-user, no admin rights, ~75 MB). It puts **SLIDE** on
 
 | | |
 |---|---|
-| ![menu](docs/screens/01-menu-garage.png) | ![garage](docs/screens/02-garage-customise.png) |
-| ![tokyo](docs/screens/04-tokyo-night-drift.png) | ![harbor](docs/screens/03-harbor-day-drift.png) |
+| ![menu](docs/screens/11-menu-garage-r34.png) | ![garage](docs/screens/12-garage-customise-r34.png) |
+| ![hero](docs/screens/14-garage-hero-r34.png) | ![livery](docs/screens/13-garage-livery-r34.png) |
+| ![tokyo](docs/screens/15-tokyo-night-drift-r34.png) | ![harbor](docs/screens/03-harbor-day-drift.png) |
 
 ## Features
 
 - **Driving** — arcade-sim drift physics: slip-angle tyres, friction ellipse, weight transfer, gearbox + RPM, turbo spool, clutch-kick, handbrake, counter-steer assist. Every car and every performance part changes the real handling. Keyboard + gamepad.
 - **Scoring** — angle × speed × duration, long-drift tiers, near misses, clipping zones, corner chains, perfect combos, tandem proximity, multiplier. Crash or spin = combo lost.
-- **Cars** — 18 cars (JDM, European, muscle, supercar, classic) with their own synthesized engine note, turbo/blow-off, tyre squeal.
+- **Cars** — 18 cars (JDM, European, muscle, supercar, classic) with their own synthesized engine note, turbo/blow-off, tyre squeal. Eight of them (R34 GT-R, Supra A80, 180SX, AE86, Huracán EVO, 911 Turbo 930, Mustang Boss 302, Challenger 1970) use detailed real 3D models; the rest use the built-in procedural bodies. Paint, finishes, liveries, tint, lights, underglow and all wheel options work on every model.
 - **Customisation** — body kits (bumpers, skirts, widebody, wings, hoods, fenders, mirrors), wheels (designs, size, colour, finish, offset, camber, width, tyres), paints (gloss/metallic/pearl/candy/satin/matte/chrome/colour-shift, two-tone), liveries + stickers + plate text, tint, headlight colour, underglow, exhaust flames, 9 performance categories, tuning sliders. Live 3D preview in a graffiti street garage.
 - **Maps** — Tokyo City (traffic), Mountain Pass (touge), Industrial Zone, Harbor, Desert Highway, Drift Arena. Day / dusk / night, live mini-map.
 - **Modes** — Free Roam, Drift Challenge, Time Attack, Tandem Drift (AI lead car), Career (30 events, 6 tiers), local leaderboards + personal records, profile stats + achievements.
@@ -49,6 +50,12 @@ Press **Ctrl+Shift+F12** (or long-press the profile card in the menu for about a
 python3 -m http.server 8080      # then open http://localhost:8080  (any static server works)
 cd launcher && npm install && npm start      # the desktop launcher
 ```
+
+## Adding a real car model
+
+Models live in `assets/models/<carId>.glb` (+ `<carId>.json`), listed in `js/data/models.js`. To add one: put the source glTF/GLB somewhere, add a recipe to `scripts/models/recipes.mjs`
+(front axis, real length, tyre material/nodes, paint/glass/head/tail material roles) and run `node scripts/models/prep.mjs <carId>` — it bakes orientation/scale, cuts out the baked wheels
+(the game draws its own on four pivots), measures wheelbase/track/arches and a body profile (for body-kit add-ons), simplifies and compresses. Cars without a model fall back to the procedural body automatically.
 
 ## Publishing an update
 
