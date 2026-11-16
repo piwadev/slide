@@ -13,4 +13,6 @@ export const RECIPES = {
       { name: 'Glass', flat: [0.05, 0.08, 0.1, 1], test: (r, g, b) => b > 200 && r < 190 },
     ] },
     roles: { paint: ['^Paint$'], glass: ['^Glass$'] } },
+  huracan: { src: 'cs_2019_lamborghini_huracan_evo.glb', forward: '-z', L: 4.52, tireNodes: '^Object_(179|181|183|185)$', maxTris: 60000, cutR: 1.03,
+    roles: { paint: ['^Huracan_EVO_Paint$'], glass: ['^Glass_Parts$'], head: ['performantespyderlightdiffuse0131', '^material$'], tail: ['^Red_Glass$', '^0021_DarkRed_2$'] } },
 };
