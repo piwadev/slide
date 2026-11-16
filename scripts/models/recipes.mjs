@@ -9,7 +9,7 @@ export const RECIPES = {
     roles: { paint: ['^Body\\.001$'], glass: ['^Windows$'], head: ['^Headlights$'], tail: ['^Brakelights\\.001$'] } },
   ae86: { src: 'pp_ae86.glb', forward: '+z', L: 4.15, tireNodes: '^Wheel', maxTris: 60000, cutR: 1.04,
     texSplit: { material: '^Body$', rest: 'Trim', rules: [
-      { name: 'Paint', test: (r, g, b) => r > 232 && g > 232 && b > 232 },
+      { name: 'Paint', flat: [1, 1, 1, 1], test: (r, g, b) => r >= 205 && Math.abs(r - g) < 8 && Math.abs(g - b) < 8 },
       { name: 'Glass', flat: [0.05, 0.08, 0.1, 1], test: (r, g, b) => b > 200 && r < 190 },
     ] },
     roles: { paint: ['^Paint$'], glass: ['^Glass$'] } },
@@ -17,4 +17,8 @@ export const RECIPES = {
     roles: { paint: ['^Huracan_EVO_Paint$'], glass: ['^Glass_Parts$'], head: ['performantespyderlightdiffuse0131', '^material$'], tail: ['^Red_Glass$', '^0021_DarkRed_2$'] } },
   '964': { src: 'free_1975_porsche_911_930_turbo.glb', forward: '+z', L: 4.29, tire: '^930_tire$', dropMat: '^material_0$', dropNodes: '^Object_(32|49|76)$', maxTris: 60000, tex: 1024,
     roles: { paint: ['^paint$', '^coat$'], glass: ['^glass$'], head: [{ m: '^930_lights', z: 'front' }], tail: [{ m: '^930_lights$', z: 'rear' }] } },
+  mustang: { src: 'tfg_ford_mustang_boss_302.glb', forward: '+z', L: 4.76, tire: '^Material\\.001$', maxTris: 70000, simpErr: 0.01,
+    roles: { paint: ['^car_paint(\\.001)?$'], glass: ['^Material\\.051$'], head: ['^Material\\.038$', '^Material\\.041$', '^Material\\.042$'], tail: ['^Material\\.031$', '^Material\\.046$', '^Material\\.036$', '^Material\\.047$'] } },
+  challenger: { src: 'tfg_dodge_challenger_1970.glb', forward: '+z', L: 4.86, tireNodes: '^Tire[LR]\\d', maxTris: 80000, simpErr: 0.08,
+    roles: { paint: ['^Body$'], glass: ['^Glass$'], head: ['^FrontLight$', '^Lens$'], tail: ['^RearLights$'] } },
 };

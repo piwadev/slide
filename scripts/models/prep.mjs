@@ -94,6 +94,8 @@ async function prep(id) {
     for (const m of out) for (const p of [...m.listPrimitives()]) {
       if (p.getMaterial() !== mat0) continue; const uv = p.getAttribute('TEXCOORD_0').getArray(), idx = p.getIndices().getArray(); const groups = {};
       for (let t = 0; t < idx.length; t += 3) { let u = 0, v = 0; for (let k = 0; k < 3; k++) { u += uv[idx[t + k] * 2] / 3; v += uv[idx[t + k] * 2 + 1] / 3; } const c = texel(u, v); let name = T.rest || mat0.getName(); for (const r of T.rules) if (r.test(c[0], c[1], c[2])) { name = r.name; break; } (groups[name] ||= []).push(idx[t], idx[t + 1], idx[t + 2]); }
+      if (T.debug) { const h = {}; for (let t = 0; t < idx.length; t += 3) { let u = 0, v = 0; for (let k = 0; k < 3; k++) { u += uv[idx[t + k] * 2] / 3; v += uv[idx[t + k] * 2 + 1] / 3; } const c = texel(u, v).join(','); h[c] = (h[c] || 0) + 1; } console.log(Object.entries(h).sort((a, b) => b[1] - a[1]).slice(0, 12)); }
+      console.log('texSplit', Object.entries(groups).map(([k, v]) => k + ':' + v.length / 3).join(' '));
       m.removePrimitive(p);
       for (const [name, arr] of Object.entries(groups)) { const np = doc.createPrimitive().setMode(4).setMaterial(mk[name] || mat0).setIndices(doc.createAccessor().setType('SCALAR').setArray(Uint32Array.from(arr)).setBuffer(buf)); for (const sem of p.listSemantics()) np.setAttribute(sem, p.getAttribute(sem)); m.addPrimitive(np); }
     }
