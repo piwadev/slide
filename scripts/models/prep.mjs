@@ -34,6 +34,7 @@ async function prep(id) {
   const dropMat = R.dropMat ? new RegExp(R.dropMat, 'i') : null;
   const out = [];
   for (const n of nodes) {
+    if (R.dropNodes && new RegExp(R.dropNodes).test(n.getName() || '')) continue;
     const W = n.getWorldMatrix(); const mesh = n.getMesh(); const m2 = mesh.clone(); m2.setName(n.getName() || 'm');
     for (const p of m2.listPrimitives()) {
       if (p.getMode() !== 4) { m2.removePrimitive(p); continue; }

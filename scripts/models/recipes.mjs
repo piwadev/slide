@@ -15,4 +15,6 @@ export const RECIPES = {
     roles: { paint: ['^Paint$'], glass: ['^Glass$'] } },
   huracan: { src: 'cs_2019_lamborghini_huracan_evo.glb', forward: '-z', L: 4.52, tireNodes: '^Object_(179|181|183|185)$', maxTris: 60000, cutR: 1.03,
     roles: { paint: ['^Huracan_EVO_Paint$'], glass: ['^Glass_Parts$'], head: ['performantespyderlightdiffuse0131', '^material$'], tail: ['^Red_Glass$', '^0021_DarkRed_2$'] } },
+  '964': { src: 'free_1975_porsche_911_930_turbo.glb', forward: '+z', L: 4.29, tire: '^930_tire$', dropMat: '^material_0$', dropNodes: '^Object_(32|49|76)$', maxTris: 60000, tex: 1024,
+    roles: { paint: ['^paint$', '^coat$'], glass: ['^glass$'], head: [{ m: '^930_lights', z: 'front' }], tail: [{ m: '^930_lights$', z: 'rear' }] } },
 };

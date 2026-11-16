@@ -16,14 +16,17 @@ export const modelReady = id => { const c = cache.get(id); return !!c && c !== '
 const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 function prepareAsset(gltf, meta) {
   const scene = gltf.scene; scene.updateMatrixWorld(true);
-  const res = {}; for (const k of Object.keys(meta.roles || {})) res[k] = meta.roles[k].map(s => new RegExp(s, 'i'));
-  const roleOf = n => { for (const k of Object.keys(res)) if (res[k].some(r => r.test(n))) return k; return null; };
+  // role entries: 'materialRegex' or { m: 'materialRegex', z: 'front'|'rear' } (front = +z half of the car)
+  const res = {}; for (const k of Object.keys(meta.roles || {})) res[k] = meta.roles[k].map(e => typeof e === 'string' ? { r: new RegExp(e, 'i') } : { r: new RegExp(e.m, 'i'), z: e.z });
+  const roleOf = (n, zc) => { for (const k of Object.keys(res)) if (res[k].some(e => e.r.test(n) && (!e.z || (e.z === 'front') === (zc > 0)))) return k; return null; };
+  const bbox = new THREE.Box3(), ctr = new THREE.Vector3();
   const v = new THREE.Vector3(), nv = new THREE.Vector3(), nm = new THREE.Matrix3();
   const L = meta.L, halfL = L / 2, Wh = meta.W / 2, H = meta.H;
   scene.traverse(o => {
     if (!o.isMesh) return;
     o.userData.sharedGeo = true; const mats = Array.isArray(o.material) ? o.material : [o.material];
-    const role = roleOf(mats[0].name); o.userData.role = role;
+    if (!o.geometry.boundingBox) o.geometry.computeBoundingBox(); bbox.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld); bbox.getCenter(ctr);
+    const role = roleOf(mats[0].name, ctr.z); o.userData.role = role;
     if (role === 'paint' || role === 'hood' || role === 'roof') { // planar re-projection of the paint canvas: u = nose->tail, v = ring (side wall low band, top high band)
       const g = o.geometry, pos = g.attributes.position, nor = g.attributes.normal; if (!nor) g.computeVertexNormals();
       const N = g.attributes.normal, uv = new Float32Array(pos.count * 2); nm.getNormalMatrix(o.matrixWorld);
