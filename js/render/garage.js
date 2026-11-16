@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { CarModel } from './carBuilder.js';
+import { makeCarModel, ensureCarAsset, hasModel, modelReady } from './glbCar.js';
 import { trafficMesh } from '../game/traffic.js';
 import { rng, canvasTex } from './kit.js';
 
@@ -122,9 +122,10 @@ export class GarageScene {
   // ---------------------------------------------------------------- car
   setCar(car, cfg, opts = {}) {
     if (this.model) { this.carSlot.remove(this.model.root); this.model.dispose(); this.model = null; }
-    this.car = car; this.cfg = cfg; const m = this.model = new CarModel(car, cfg, { low: false }); m.root.position.y = 0.08; this.carSlot.add(m.root); m.root.rotation.y = this.yaw0;
+    this.car = car; this.cfg = cfg; const m = this.model = makeCarModel(car, cfg, { low: false }); m.root.position.y = 0.08; this.carSlot.add(m.root); m.root.rotation.y = this.yaw0;
     m.root.traverse(o => { if (o.isMesh) { o.castShadow = true; } });
     this.setLiftCar(opts.lift);
+    if (hasModel(car.id) && !modelReady(car.id)) ensureCarAsset(car.id).then(a => { if (a && this.car === car && this.model === m) this.setCar(car, this.cfg, opts); });
     return m;
   }
   setLiftCar() {}

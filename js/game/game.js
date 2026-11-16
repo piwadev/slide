@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { carById, CARS } from '../data/cars.js';
 import { defaultCfg, computeStats, itemOf, TIRES, PART_CATS } from '../data/parts.js';
 import { MAPS } from '../data/maps.js';
-import { CarModel } from '../render/carBuilder.js';
+import { makeCarModel, ensureCarAssets } from '../render/glbCar.js';
 import { buildMap } from '../render/maps.js';
 import { lightFor, makeSky, makeEnv } from '../render/sky.js';
 import { FX } from '../render/fx.js';
@@ -23,6 +23,7 @@ const SMOKE_TINT = { day: [0.92, 0.92, 0.94], dusk: [0.6, 0.42, 0.36], night: [0
 export class Game {
   constructor(app) { this.app = app; this.stage = app.stage; this.input = app.input; this.profile = app.profile; this.running = false; this.hud = {}; this.toasts = []; }
   async start(o) {
+    { const lid = LEADS[(o.event && o.event.tier) || 2] || 's15'; await ensureCarAssets([o.carId, ...(o.mode === 'tandem' ? [lid === o.carId ? 'ae86' : lid] : [])]); }
     this.o = o; this.mapId = o.mapId; this.map = MAPS[o.mapId]; this.tod = o.tod || this.map.tod; this.mode = o.mode || 'free'; this.event = o.event || null; this.stage.setQuality(o.quality || 'high'); const Q = this.stage.q;
     const L = this.L = lightFor(null, this.tod); const scene = this.scene = new THREE.Scene();
     this.sky = makeSky(L); scene.add(this.sky); scene.fog = new THREE.FogExp2(new THREE.Color(L.fog), L.fogD * (this.mapId === 'mountain' ? 0.8 : 1));
@@ -34,7 +35,7 @@ export class Game {
     this.fx = new FX(scene, o.quality || 'high'); this.fx.setTint(...(SMOKE_TINT[this.tod] || [1, 1, 1]));
     // player
     const car = this.car = carById[o.carId]; const cfg = this.cfg = o.cfg || defaultCfg(car);
-    this.model = new CarModel(car, cfg, { low: o.quality === 'low' }); this.model.root.rotation.order = 'YXZ'; scene.add(this.model.root);
+    this.model = makeCarModel(car, cfg, { low: o.quality === 'low' }); this.model.root.rotation.order = 'YXZ'; scene.add(this.model.root);
     this.veh = new Vehicle(car, cfg); this.stats = this.veh.stats; this.manual = !!o.manual; this.veh.manual = this.manual;
     this.addLights();
     const sp = this.world.spawn; this.spawnYaw = Math.atan2(sp.tx, sp.tz); this.veh.reset(sp.x, sp.z, this.spawnYaw); this.veh.x = sp.x; this.veh.z = sp.z;
@@ -43,7 +44,7 @@ export class Game {
     this.traffic = null; if (this.world.traffic && this.mode !== 'tandem' && this.mode !== 'timeattack') this.traffic = new Traffic(this.world, scene, Q.traffic);
     // lead car
     this.lead = null; if (this.mode === 'tandem') { const lid = LEADS[(this.event && this.event.tier) || 2] || 's15'; const lc = carById[lid === car.id ? 'ae86' : lid]; const lcfg = defaultCfg(lc); lcfg.livery = { id: ['samurai', 'racing', 'flames', 'sakura', 'oni'][(this.event ? this.event.tier : 1) % 5], c1: '#ffffff', c2: '#e63946', c3: '#111' }; lcfg.paint.color = ['#d94a2b', '#2a6fdb', '#f2c230', '#9b3df0', '#23b878', '#e8e8ec'][(this.event ? this.event.n : 0) % 6]; lcfg.parts.spoiler = 'drift'; lcfg.parts.widebody = 'mild'; lcfg.look.glow = ['#ff1d3d', '#00f0ff', '#a24bff'][(this.event ? this.event.n : 0) % 3]; lcfg.wheels.camR = -4; lcfg.wheels.camF = -3; lcfg.wheels.design = 'te6';
-      const lm = new CarModel(lc, lcfg, { low: true }); lm.root.rotation.order = 'YXZ'; scene.add(lm.root); this.lead = new LeadCar(this.world, lm, this.fx); this.leadCar = lc; }
+      const lm = makeCarModel(lc, lcfg, { low: true }); lm.root.rotation.order = 'YXZ'; scene.add(lm.root); this.lead = new LeadCar(this.world, lm, this.fx); this.leadCar = lc; }
     // scoring
     this.scorer = new DriftScorer({ onBank: (p, i) => this.onBank(p, i), onLose: l => { audio.fail(); this.shake(0.4); }, onBonus: k => audio.combo() });
     this.runStats = this.scorer.stats; this.time = 0; this.phase = 'countdown'; this.cd = 3.4; this.paused = false; this.finished = false; this.lastCrash = -9; this.cashEarned = 0;
