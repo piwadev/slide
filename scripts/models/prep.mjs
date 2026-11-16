@@ -44,6 +44,7 @@ async function prep(id) {
         if (na) { let q = rotV(W, na[i], na[i + 1], na[i + 2]); if (up === '+z') q = [q[0], q[2], -q[1]]; q = rotV(Ry, ...q); const l = Math.hypot(...q) || 1; na[i] = q[0] / l; na[i + 1] = q[1] / l; na[i + 2] = q[2] / l; }
       }
       pos.setArray(arr); p.setAttribute('POSITION', pos); if (nrm) { nrm.setArray(na); p.setAttribute('NORMAL', nrm); }
+      if (R.tireNodes && new RegExp(R.tireNodes).test(n.getName() || '')) p.setExtras({ ...(p.getExtras() || {}), wheel: true });
       if (p.getAttribute('TANGENT')) p.setAttribute('TANGENT', null);
       ensureIdx(doc, p);
     }
@@ -58,7 +59,7 @@ async function prep(id) {
   const bb = (filter) => { const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; for (const p of prims()) { if (filter && !filter(p)) continue; const a = p.getAttribute('POSITION').getArray(); for (let i = 0; i < a.length; i += 3) for (let k = 0; k < 3; k++) { const v = a[i + k]; if (v < mn[k]) mn[k] = v; if (v > mx[k]) mx[k] = v; } } return { mn, mx }; };
   const b0 = bb(p => !/glass/i.test(p.getMaterial()?.getName() || '') || true);
   const s = R.L / (b0.mx[2] - b0.mn[2]); const cx = (b0.mn[0] + b0.mx[0]) / 2, cz = (b0.mn[2] + b0.mx[2]) / 2;
-  const tireRe = new RegExp(R.tire, 'i'); const isTire = p => tireRe.test(p.getMaterial()?.getName() || '') || tireRe.test(p.getName() || '');
+  const tireRe = R.tire ? new RegExp(R.tire, 'i') : null; const isTire = p => (p.getExtras() && p.getExtras().wheel) || (tireRe && tireRe.test(p.getMaterial()?.getName() || ''));
   const tb = bb(isTire); if (tb.mn[1] > 1e8) throw new Error('no tire prims for ' + id);
   const gy = tb.mn[1];
   for (const p of prims()) { const a = p.getAttribute('POSITION'); const arr = Float32Array.from(a.getArray()); for (let i = 0; i < arr.length; i += 3) { arr[i] = (arr[i] - cx) * s; arr[i + 1] = (arr[i + 1] - gy) * s; arr[i + 2] = (arr[i + 2] - cz) * s; } a.setArray(arr); }
@@ -82,6 +83,20 @@ async function prep(id) {
     p.getIndices().setArray(Uint32Array.from(keep));
   }
   for (const m of out) for (const p of m.listPrimitives()) if (p.getIndices().getCount() === 0) m.removePrimitive(p);
+
+  // ---- 4b. optional: split a palette-textured material into role materials by the texel colour under each triangle
+  if (R.texSplit) {
+    const T = R.texSplit; const mat0 = root.listMaterials().find(m => new RegExp(T.material).test(m.getName())); const tex = mat0.getBaseColorTexture();
+    const { data, info } = await sharp(Buffer.from(tex.getImage())).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const texel = (u, v) => { const x = Math.min(info.width - 1, Math.max(0, Math.floor((u - Math.floor(u)) * info.width))), y = Math.min(info.height - 1, Math.max(0, Math.floor((v - Math.floor(v)) * info.height))); const o = (y * info.width + x) * 3; return [data[o], data[o + 1], data[o + 2]]; };
+    const mk = {}; for (const r of T.rules) { const m = mat0.clone().setName(r.name); if (r.flat) { m.setBaseColorTexture(null); m.setBaseColorFactor(r.flat); } mk[r.name] = m; }
+    for (const m of out) for (const p of [...m.listPrimitives()]) {
+      if (p.getMaterial() !== mat0) continue; const uv = p.getAttribute('TEXCOORD_0').getArray(), idx = p.getIndices().getArray(); const groups = {};
+      for (let t = 0; t < idx.length; t += 3) { let u = 0, v = 0; for (let k = 0; k < 3; k++) { u += uv[idx[t + k] * 2] / 3; v += uv[idx[t + k] * 2 + 1] / 3; } const c = texel(u, v); let name = T.rest || mat0.getName(); for (const r of T.rules) if (r.test(c[0], c[1], c[2])) { name = r.name; break; } (groups[name] ||= []).push(idx[t], idx[t + 1], idx[t + 2]); }
+      m.removePrimitive(p);
+      for (const [name, arr] of Object.entries(groups)) { const np = doc.createPrimitive().setMode(4).setMaterial(mk[name] || mat0).setIndices(doc.createAccessor().setType('SCALAR').setArray(Uint32Array.from(arr)).setBuffer(buf)); for (const sem of p.listSemantics()) np.setAttribute(sem, p.getAttribute(sem)); m.addPrimitive(np); }
+    }
+  }
   // ---- 5. profile height-map (top surface over s,x) + half-width per slice
   const all = bb(); const H = all.mx[1], halfL = R.L / 2; const NS = 80, NX = 21; const Wh = Math.max(Math.abs(all.mn[0]), Math.abs(all.mx[0]));
   const top = Array.from({ length: NS + 1 }, () => new Float32Array(NX)); const hw = new Float32Array(NS + 1);
